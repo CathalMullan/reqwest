@@ -7,11 +7,11 @@ use http::{request::Parts, Method, Request as HttpRequest};
 use serde::Serialize;
 #[cfg(feature = "json")]
 use serde_json;
-use url::Url;
 use web_sys::{RequestCache, RequestCredentials};
 
 use super::{Body, Client, Response};
 use crate::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE};
+use crate::Url;
 
 /// A request which can be executed with `Client::execute()`.
 pub struct Request {

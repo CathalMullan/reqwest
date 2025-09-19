@@ -1,4 +1,4 @@
-use url::Url;
+use crate::Url;
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct ResponseUrl(pub Url);
@@ -21,8 +21,8 @@ impl ResponseBuilderExt for http::response::Builder {
 #[cfg(test)]
 mod tests {
     use super::{ResponseBuilderExt, ResponseUrl};
+    use crate::Url;
     use http::response::Builder;
-    use url::Url;
 
     #[test]
     fn test_response_builder_ext() {

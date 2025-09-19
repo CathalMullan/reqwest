@@ -2997,11 +2997,12 @@ impl fmt::Debug for Pending {
 #[cfg(test)]
 mod tests {
     #![cfg(not(feature = "rustls-tls-manual-roots-no-provider"))]
+    use crate::Url;
 
     #[tokio::test]
     async fn execute_request_rejects_invalid_urls() {
         let url_str = "hxxps://www.rust-lang.org/";
-        let url = url::Url::parse(url_str).unwrap();
+        let url = Url::parse(url_str).unwrap();
         let result = crate::get(url.clone()).await;
 
         assert!(result.is_err());
@@ -3014,7 +3015,7 @@ mod tests {
     #[tokio::test]
     async fn execute_request_rejects_invalid_hostname() {
         let url_str = "https://{{hostname}}/";
-        let url = url::Url::parse(url_str).unwrap();
+        let url = Url::parse(url_str).unwrap();
         let result = crate::get(url.clone()).await;
 
         assert!(result.is_err());

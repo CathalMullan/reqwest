@@ -277,7 +277,6 @@ macro_rules! if_hyper {
 pub use http::header;
 pub use http::Method;
 pub use http::{StatusCode, Version};
-pub use url::Url;
 
 // universal mods
 #[macro_use]
@@ -393,3 +392,7 @@ if_wasm! {
     #[cfg(feature = "multipart")]
     pub use self::wasm::multipart;
 }
+
+// FORK
+mod shim;
+pub use shim::Url;

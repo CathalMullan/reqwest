@@ -3,9 +3,9 @@ use std::fmt;
 use bytes::Bytes;
 use http::{HeaderMap, StatusCode};
 use js_sys::Uint8Array;
-use url::Url;
 
 use crate::wasm::AbortGuard;
+use crate::Url;
 
 #[cfg(feature = "stream")]
 use wasm_bindgen::JsCast;

@@ -12,13 +12,13 @@ use serde::de::DeserializeOwned;
 #[cfg(feature = "json")]
 use serde_json;
 use tokio::time::Sleep;
-use url::Url;
 
 use super::body::Body;
 use super::decoder::{Accepts, Decoder};
 use crate::async_impl::body::ResponseBody;
 #[cfg(feature = "cookies")]
 use crate::cookie;
+use crate::Url;
 
 #[cfg(feature = "charset")]
 use encoding_rs::{Encoding, UTF_8};
@@ -493,9 +493,8 @@ impl From<Response> for http::Response<Body> {
 #[cfg(test)]
 mod tests {
     use super::Response;
-    use crate::ResponseBuilderExt;
+    use crate::{ResponseBuilderExt, Url};
     use http::response::Builder;
-    use url::Url;
 
     #[test]
     fn test_from_http_response() {

@@ -1,6 +1,7 @@
 //! HTTP Cookies
 
 use crate::header::{HeaderValue, SET_COOKIE};
+use crate::Url;
 use bytes::Bytes;
 use std::convert::TryInto;
 use std::fmt;
@@ -10,9 +11,9 @@ use std::time::SystemTime;
 /// Actions for a persistent cookie store providing session support.
 pub trait CookieStore: Send + Sync {
     /// Store a set of Set-Cookie header values received from `url`
-    fn set_cookies(&self, cookie_headers: &mut dyn Iterator<Item = &HeaderValue>, url: &url::Url);
+    fn set_cookies(&self, cookie_headers: &mut dyn Iterator<Item = &HeaderValue>, url: &Url);
     /// Get any Cookie values in the store for `url`
-    fn cookies(&self, url: &url::Url) -> Option<HeaderValue>;
+    fn cookies(&self, url: &Url) -> Option<HeaderValue>;
 }
 
 /// A single HTTP cookie.
@@ -154,29 +155,35 @@ impl Jar {
     ///
     /// // and now add to a `ClientBuilder`?
     /// ```
-    pub fn add_cookie_str(&self, cookie: &str, url: &url::Url) {
+    pub fn add_cookie_str(&self, cookie: &str, url: &Url) {
         let cookies = cookie_crate::Cookie::parse(cookie)
             .ok()
             .map(|c| c.into_owned())
             .into_iter();
-        self.0.write().unwrap().store_response_cookies(cookies, url);
+        self.0
+            .write()
+            .unwrap()
+            .store_response_cookies(cookies, &url.inner);
     }
 }
 
 impl CookieStore for Jar {
-    fn set_cookies(&self, cookie_headers: &mut dyn Iterator<Item = &HeaderValue>, url: &url::Url) {
+    fn set_cookies(&self, cookie_headers: &mut dyn Iterator<Item = &HeaderValue>, url: &Url) {
         let iter =
             cookie_headers.filter_map(|val| Cookie::parse(val).map(|c| c.0.into_owned()).ok());
 
-        self.0.write().unwrap().store_response_cookies(iter, url);
+        self.0
+            .write()
+            .unwrap()
+            .store_response_cookies(iter, &url.inner);
     }
 
-    fn cookies(&self, url: &url::Url) -> Option<HeaderValue> {
+    fn cookies(&self, url: &Url) -> Option<HeaderValue> {
         let s = self
             .0
             .read()
             .unwrap()
-            .get_request_values(url)
+            .get_request_values(&url.inner)
             .map(|(name, value)| format!("{name}={value}"))
             .collect::<Vec<_>>()
             .join("; ");
@@ -191,6 +198,7 @@ impl CookieStore for Jar {
 
 pub(crate) mod service {
     use crate::cookie;
+    use crate::Url;
     use http::{Request, Response};
     use http_body::Body;
     use pin_project_lite::pin_project;
@@ -201,7 +209,6 @@ pub(crate) mod service {
     use std::task::Context;
     use std::task::Poll;
     use tower::Service;
-    use url::Url;
 
     /// A [`Service`] that adds cookie support to a lower-level [`Service`].
     #[derive(Clone)]

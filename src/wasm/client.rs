@@ -3,11 +3,10 @@ use http::{HeaderMap, HeaderValue, Method};
 use js_sys::{Promise, JSON};
 use std::convert::TryInto;
 use std::{fmt, future::Future, sync::Arc};
-use url::Url;
 use wasm_bindgen::prelude::{wasm_bindgen, UnwrapThrowExt as _};
 
 use super::{AbortGuard, Request, RequestBuilder, Response};
-use crate::IntoUrl;
+use crate::{IntoUrl, Url};
 
 #[wasm_bindgen]
 extern "C" {

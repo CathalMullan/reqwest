@@ -1,4 +1,4 @@
-use url::Url;
+use crate::Url;
 
 /// A trait to try to convert some type into a `Url`.
 ///
