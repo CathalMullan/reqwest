@@ -8,8 +8,6 @@ use std::time::Duration;
 use bytes::Bytes;
 use http;
 use hyper::header::HeaderMap;
-#[cfg(feature = "json")]
-use serde::de::DeserializeOwned;
 
 use super::client::KeepCoreThreadAlive;
 use super::wait;
@@ -243,7 +241,7 @@ impl Response {
     /// [`serde_json::from_reader`]: https://docs.serde.rs/serde_json/fn.from_reader.html
     #[cfg(feature = "json")]
     #[cfg_attr(docsrs, doc(cfg(feature = "json")))]
-    pub fn json<T: DeserializeOwned>(self) -> crate::Result<T> {
+    pub fn json<T: serde::de::DeserializeOwned>(self) -> crate::Result<T> {
         wait::timeout(self.inner.json(), self.timeout).map_err(|e| match e {
             wait::Waited::TimedOut(e) => crate::error::decode(e),
             wait::Waited::Inner(e) => e,

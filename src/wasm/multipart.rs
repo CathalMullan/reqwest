@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 //! multipart/form-data
 use std::borrow::Cow;
 use std::fmt;

@@ -4,14 +4,11 @@ use std::time::Duration;
 
 use bytes::Bytes;
 use http::{request::Parts, Method, Request as HttpRequest};
-use serde::Serialize;
-#[cfg(feature = "json")]
-use serde_json;
 use url::Url;
 use web_sys::{RequestCache, RequestCredentials};
 
 use super::{Body, Client, Response};
-use crate::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE};
+use crate::header::{HeaderMap, HeaderName, HeaderValue};
 
 /// A request which can be executed with `Client::execute()`.
 pub struct Request {
@@ -157,10 +154,16 @@ impl RequestBuilder {
     /// as `.query(&[("key", "val")])`. It's also possible to serialize structs
     /// and maps into a key-value pair.
     ///
+    /// # Optional
+    ///
+    /// This requires the optional `query` feature enabled.
+    ///
     /// # Errors
     /// This method will fail if the object you provide cannot be serialized
     /// into a query string.
-    pub fn query<T: Serialize + ?Sized>(mut self, query: &T) -> RequestBuilder {
+    #[cfg(feature = "query")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "query")))]
+    pub fn query<T: serde::Serialize + ?Sized>(mut self, query: &T) -> RequestBuilder {
         let mut error = None;
         if let Ok(ref mut req) = self.request {
             let url = req.url_mut();
@@ -188,17 +191,23 @@ impl RequestBuilder {
     /// and also sets the `Content-Type: application/x-www-form-urlencoded`
     /// header.
     ///
+    /// # Optional
+    ///
+    /// This requires the optional `form` feature enabled.
+    ///
     /// # Errors
     ///
     /// This method fails if the passed value cannot be serialized into
     /// url encoded format
-    pub fn form<T: Serialize + ?Sized>(mut self, form: &T) -> RequestBuilder {
+    #[cfg(feature = "form")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "form")))]
+    pub fn form<T: serde::Serialize + ?Sized>(mut self, form: &T) -> RequestBuilder {
         let mut error = None;
         if let Ok(ref mut req) = self.request {
             match serde_urlencoded::to_string(form) {
                 Ok(body) => {
                     req.headers_mut().insert(
-                        CONTENT_TYPE,
+                        crate::header::CONTENT_TYPE,
                         HeaderValue::from_static("application/x-www-form-urlencoded"),
                     );
                     *req.body_mut() = Some(body.into());
@@ -215,13 +224,15 @@ impl RequestBuilder {
     #[cfg(feature = "json")]
     #[cfg_attr(docsrs, doc(cfg(feature = "json")))]
     /// Set the request json
-    pub fn json<T: Serialize + ?Sized>(mut self, json: &T) -> RequestBuilder {
+    pub fn json<T: serde::Serialize + ?Sized>(mut self, json: &T) -> RequestBuilder {
         let mut error = None;
         if let Ok(ref mut req) = self.request {
             match serde_json::to_vec(json) {
                 Ok(body) => {
-                    req.headers_mut()
-                        .insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+                    req.headers_mut().insert(
+                        crate::header::CONTENT_TYPE,
+                        HeaderValue::from_static("application/json"),
+                    );
                     *req.body_mut() = Some(body.into());
                 }
                 Err(err) => error = Some(crate::error::builder(err)),

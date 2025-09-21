@@ -7,10 +7,6 @@ use bytes::Bytes;
 use http_body_util::BodyExt;
 use hyper::{HeaderMap, StatusCode, Version};
 use hyper_util::client::legacy::connect::HttpInfo;
-#[cfg(feature = "json")]
-use serde::de::DeserializeOwned;
-#[cfg(feature = "json")]
-use serde_json;
 use tokio::time::Sleep;
 use url::Url;
 
@@ -270,7 +266,7 @@ impl Response {
     /// [`serde_json::from_reader`]: https://docs.serde.rs/serde_json/fn.from_reader.html
     #[cfg(feature = "json")]
     #[cfg_attr(docsrs, doc(cfg(feature = "json")))]
-    pub async fn json<T: DeserializeOwned>(self) -> crate::Result<T> {
+    pub async fn json<T: serde::de::DeserializeOwned>(self) -> crate::Result<T> {
         let full = self.bytes().await?;
 
         serde_json::from_slice(&full).map_err(crate::error::decode)
