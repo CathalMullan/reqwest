@@ -15,6 +15,7 @@
 - Fix default TCP timeout values to enabled and faster.
 - Fix SOCKS proxies to default to port 1080
 - (wasm) Add cache methods to `RequestBuilder`.
+- (wasm) Change header parsing to use native array access instead of `serde_json`.
 
 ## v0.12.22
 

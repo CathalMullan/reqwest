@@ -1,10 +1,11 @@
 use http::header::USER_AGENT;
 use http::{HeaderMap, HeaderValue, Method};
-use js_sys::{Promise, JSON};
+use js_sys::Promise;
 use std::convert::TryInto;
 use std::{fmt, future::Future, sync::Arc};
 use url::Url;
 use wasm_bindgen::prelude::{wasm_bindgen, UnwrapThrowExt as _};
+use wasm_bindgen::JsCast;
 
 use super::{AbortGuard, Request, RequestBuilder, Response};
 use crate::IntoUrl;
@@ -261,11 +262,18 @@ async fn fetch(req: Request) -> crate::Result<Response> {
 
     for item in js_iter {
         let item = item.expect_throw("headers iterator doesn't throw");
-        let serialized_headers: String = JSON::stringify(&item)
-            .expect_throw("serialized headers")
-            .into();
-        let [name, value]: [String; 2] = serde_json::from_str(&serialized_headers)
-            .expect_throw("deserializable serialized headers");
+        let item: js_sys::Array = item.dyn_into().expect_throw("header item is array");
+
+        let name = item
+            .get(0)
+            .as_string()
+            .expect_throw("header name is string");
+
+        let value = item
+            .get(1)
+            .as_string()
+            .expect_throw("header value is string");
+
         resp = resp.header(&name, &value);
     }
 
