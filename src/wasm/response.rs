@@ -13,9 +13,6 @@ use wasm_bindgen::JsCast;
 #[cfg(feature = "stream")]
 use futures_util::stream::{self, StreamExt};
 
-#[cfg(feature = "json")]
-use serde::de::DeserializeOwned;
-
 /// A Response to a submitted `Request`.
 pub struct Response {
     http: http::Response<web_sys::Response>,
@@ -89,7 +86,7 @@ impl Response {
     /// Try to deserialize the response body as JSON.
     #[cfg(feature = "json")]
     #[cfg_attr(docsrs, doc(cfg(feature = "json")))]
-    pub async fn json<T: DeserializeOwned>(self) -> crate::Result<T> {
+    pub async fn json<T: serde::de::DeserializeOwned>(self) -> crate::Result<T> {
         let full = self.bytes().await?;
 
         serde_json::from_slice(&full).map_err(crate::error::decode)
