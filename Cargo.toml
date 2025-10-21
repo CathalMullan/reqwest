@@ -112,7 +112,7 @@ __rustls-ring = ["hyper-rustls?/ring", "tokio-rustls?/ring", "rustls?/ring", "qu
 [dependencies]
 base64 = "0.22"
 http = "1.1"
-url = "2.4"
+url = { git = "https://github.com/servo/rust-url.git", branch = "main" }
 bytes = "1.2"
 futures-core = { version = "0.3.28", default-features = false }
 futures-util = { version = "0.3.28", default-features = false, optional = true }
